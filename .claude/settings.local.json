@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:hermes-agent.nousresearch.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh search:*)",
+      "Bash(curl -sL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/plugins/memory/mem0/__init__.py)",
+      "Bash(curl:*)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(item['name']\\) for item in data if isinstance\\(data, list\\)]\")"
+    ]
+  }
+}

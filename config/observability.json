@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "service_name": "hermes-agent",
+  "console_export_enabled": true,
+  "ndjson_export_enabled": true,
+  "ndjson_export_path": ".",
+  "capture_session": true,
+  "capture_llm": true,
+  "capture_tool": true,
+  "capture_llm_input": true,
+  "capture_llm_output": true,
+  "capture_tool_input": true,
+  "capture_tool_output": true
+}
