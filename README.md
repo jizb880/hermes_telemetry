@@ -1,5 +1,136 @@
 # Hermes Telemetry
 
+An OpenTelemetry observability plugin for [Hermes Agent](https://github.com/nousresearch/hermes-agent), providing full-chain trace tracking and metrics collection.
+
+**[English](#english) | [中文](#中文)**
+
+---
+
+<a id="english"></a>
+
+## Features
+
+- **6 Hook Points**: Covers Session, LLM, and Tool lifecycle (on_session_start/end, pre/post_llm_call, pre/post_tool_call)
+- **Unified Trace Correlation**: All spans within a session share a single trace_id for end-to-end tracing
+- **Dual-Channel Output**: Real-time console printing + NDJSON file persistence, no external dependencies required
+- **OpenTelemetry Standard**: Traces and Metrics follow OpenTelemetry semantic conventions
+- **Fine-Grained Control**: Each hook point can be independently toggled; input/output capture is optional
+- **Thread-Safe**: Supports concurrent tool calls with LIFO stack management for nested tool spans
+- **Zero Intrusion**: All hook errors are isolated and never affect agent operation
+
+## Span Hierarchy
+
+```
+hermes.session (root)
+└── hermes.llm.call
+    ├── hermes.tool.web_search
+    ├── hermes.tool.read_file
+    └── hermes.tool.execute_code
+```
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+pip install opentelemetry-api opentelemetry-sdk
+```
+
+### 2. Deploy Plugin
+
+```bash
+cp -r hermes_telemetry ~/.hermes/plugins/hermes_telemetry
+```
+
+### 3. Configure (Optional)
+
+Edit `~/.hermes/plugins/hermes_telemetry/config/observability.json`:
+
+```json
+{
+  "enabled": true,
+  "service_name": "hermes-agent",
+  "console_export_enabled": true,
+  "ndjson_export_enabled": true,
+  "ndjson_export_path": "."
+}
+```
+
+### 4. Run
+
+Start Hermes Agent as usual. The plugin loads automatically and begins collecting data:
+
+```bash
+hermes
+```
+
+Console output:
+
+```
+[hermes_telemetry] Initialized (service=hermes-agent)
+[hermes_telemetry] Console export: enabled
+[hermes_telemetry] NDJSON export: ./hermes-otel-spans.jsonl
+[hermes_telemetry] Hooks registered: session, llm, tool
+[hermes_telemetry] Plugin registered successfully.
+```
+
+### 5. View Data
+
+```bash
+# View NDJSON file
+cat hermes-otel-spans.jsonl | jq .
+
+# Filter by trace_id
+cat hermes-otel-spans.jsonl | jq 'select(.trace_id == "YOUR_TRACE_ID")'
+```
+
+## Project Structure
+
+```
+hermes_telemetry/
+├── plugin.yaml                      # Hermes plugin manifest
+├── __init__.py                      # Plugin entry point register(ctx)
+├── config/
+│   └── observability.json           # Default configuration
+├── hermes_otel/
+│   ├── config.py                    # Config loading & parsing
+│   ├── tracer.py                    # GlobalTracer singleton
+│   ├── state.py                     # Session state management
+│   ├── attributes.py                # Attribute truncation utilities
+│   ├── metrics.py                   # Metrics definitions
+│   ├── exporters/
+│   │   └── jsonl_file_exporter.py   # NDJSON file exporter
+│   └── hooks/
+│       ├── __init__.py              # Hook registration orchestrator
+│       ├── session.py               # Session lifecycle hooks
+│       ├── llm.py                   # LLM call hooks
+│       └── tool.py                  # Tool call hooks
+├── docs/
+│   └── USAGE.md                     # Detailed usage documentation
+├── pyproject.toml                   # Python packaging config
+└── requirements.txt                 # Dependencies
+```
+
+## Documentation
+
+See [docs/USAGE.md](docs/USAGE.md) for the complete usage and configuration guide.
+
+## References
+
+- [openclaw_telemetry](https://github.com/jizb880/openclaw_telemetry) - OpenTelemetry plugin for OpenClaw Agent (TypeScript)
+- [Hermes Agent](https://github.com/nousresearch/hermes-agent) - Self-improving AI Agent by Nous Research
+- [Hermes Agent Hooks Docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks)
+
+## License
+
+MIT
+
+---
+
+<a id="中文"></a>
+
+## 中文文档
+
 OpenTelemetry 可观测性插件，为 [Hermes Agent](https://github.com/nousresearch/hermes-agent) 提供全链路 Trace 追踪和 Metrics 指标采集能力。
 
 ## 特性
@@ -114,7 +245,3 @@ hermes_telemetry/
 - [openclaw_telemetry](https://github.com/jizb880/openclaw_telemetry) - OpenClaw Agent 的 OpenTelemetry 插件（TypeScript 实现）
 - [Hermes Agent](https://github.com/nousresearch/hermes-agent) - Nous Research 的自进化 AI Agent
 - [Hermes Agent Hooks 文档](https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks)
-
-## License
-
-MIT
